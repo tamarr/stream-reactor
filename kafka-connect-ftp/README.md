@@ -1,8 +1,9 @@
 Kafka Connect FTP
 =================
 
-> Note: All credits for this connector go to Eneco's team, whether this connector was forked from :
 Monitors files on an FTP server and feeds changes into Kafka.
+
+> Note: All credits for this connector go to Eneco's team, whether this connector was forked from https://github.com/Eneco/kafka-connect-ftp
 
 Provide the remote directories and on specified intervals, the list of files in the directories is refreshed.
 Files are downloaded when they were not known before, or when their timestamp or size are changed.
