@@ -45,7 +45,7 @@ class InfluxSettingsTest extends WordSpec with Matchers with MockitoSugar {
       when(config.getString(InfluxSinkConfig.INFLUX_CONNECTION_USER_CONFIG)).thenReturn("myuser")
       when(config.getString(InfluxSinkConfig.INFLUX_CONNECTION_PASSWORD_CONFIG)).thenReturn("apass")
       when(config.getString(InfluxSinkConfig.ERROR_POLICY_CONFIG)).thenReturn("THROW")
-      when(config.getString(InfluxSinkConfig.EXPORT_ROUTE_QUERY_CONFIG)).thenReturn(QUERY_ALL)
+      when(config.getString(InfluxSinkConfig.KCQL_CONFIG)).thenReturn(QUERY_ALL)
       InfluxSettings(config)
     }
   }
@@ -58,7 +58,7 @@ class InfluxSettingsTest extends WordSpec with Matchers with MockitoSugar {
       when(config.getString(InfluxSinkConfig.INFLUX_CONNECTION_USER_CONFIG)).thenReturn("myuser")
       when(config.getString(InfluxSinkConfig.INFLUX_CONNECTION_PASSWORD_CONFIG)).thenReturn("apass")
       when(config.getString(InfluxSinkConfig.ERROR_POLICY_CONFIG)).thenReturn("THROW")
-      when(config.getString(InfluxSinkConfig.EXPORT_ROUTE_QUERY_CONFIG)).thenReturn(QUERY_ALL)
+      when(config.getString(InfluxSinkConfig.KCQL_CONFIG)).thenReturn(QUERY_ALL)
       InfluxSettings(config)
     }
   }
@@ -71,7 +71,7 @@ class InfluxSettingsTest extends WordSpec with Matchers with MockitoSugar {
       when(config.getString(InfluxSinkConfig.INFLUX_CONNECTION_USER_CONFIG)).thenReturn("")
       when(config.getString(InfluxSinkConfig.INFLUX_CONNECTION_PASSWORD_CONFIG)).thenReturn("apass")
       when(config.getString(InfluxSinkConfig.ERROR_POLICY_CONFIG)).thenReturn("THROW")
-      when(config.getString(InfluxSinkConfig.EXPORT_ROUTE_QUERY_CONFIG)).thenReturn(QUERY_ALL)
+      when(config.getString(InfluxSinkConfig.KCQL_CONFIG)).thenReturn(QUERY_ALL)
       InfluxSettings(config)
     }
   }
@@ -86,7 +86,7 @@ class InfluxSettingsTest extends WordSpec with Matchers with MockitoSugar {
     when(config.getString(InfluxSinkConfig.INFLUX_CONNECTION_USER_CONFIG)).thenReturn(user)
     when(config.getString(InfluxSinkConfig.INFLUX_CONNECTION_PASSWORD_CONFIG)).thenReturn(null)
     when(config.getString(InfluxSinkConfig.ERROR_POLICY_CONFIG)).thenReturn("THROW")
-    when(config.getString(InfluxSinkConfig.EXPORT_ROUTE_QUERY_CONFIG)).thenReturn(QUERY_ALL)
+    when(config.getString(InfluxSinkConfig.KCQL_CONFIG)).thenReturn(QUERY_ALL)
     val settings = InfluxSettings(config)
     settings.connectionUrl shouldBe url
     settings.database shouldBe database
@@ -112,7 +112,7 @@ class InfluxSettingsTest extends WordSpec with Matchers with MockitoSugar {
     when(config.getPassword(InfluxSinkConfig.INFLUX_CONNECTION_PASSWORD_CONFIG)).thenReturn(pass)
     when(pass.value()).thenReturn("mememe")
     when(config.getString(InfluxSinkConfig.ERROR_POLICY_CONFIG)).thenReturn("THROW")
-    when(config.getString(InfluxSinkConfig.EXPORT_ROUTE_QUERY_CONFIG)).thenReturn(QUERY_SELECT)
+    when(config.getString(InfluxSinkConfig.KCQL_CONFIG)).thenReturn(QUERY_SELECT)
     val settings = InfluxSettings(config)
     settings.connectionUrl shouldBe url
     settings.database shouldBe database
@@ -138,7 +138,7 @@ class InfluxSettingsTest extends WordSpec with Matchers with MockitoSugar {
     when(config.getPassword(InfluxSinkConfig.INFLUX_CONNECTION_PASSWORD_CONFIG)).thenReturn(pass)
     when(pass.value()).thenReturn("mememe")
     when(config.getString(InfluxSinkConfig.ERROR_POLICY_CONFIG)).thenReturn("THROW")
-    when(config.getString(InfluxSinkConfig.EXPORT_ROUTE_QUERY_CONFIG)).thenReturn(QUERY_SELECT_AND_TIMESTAMP)
+    when(config.getString(InfluxSinkConfig.KCQL_CONFIG)).thenReturn(QUERY_SELECT_AND_TIMESTAMP)
     val settings = InfluxSettings(config)
     settings.connectionUrl shouldBe url
     settings.database shouldBe database
@@ -164,7 +164,7 @@ class InfluxSettingsTest extends WordSpec with Matchers with MockitoSugar {
     when(config.getPassword(InfluxSinkConfig.INFLUX_CONNECTION_PASSWORD_CONFIG)).thenReturn(pass)
     when(pass.value()).thenReturn("mememe")
     when(config.getString(InfluxSinkConfig.ERROR_POLICY_CONFIG)).thenReturn("THROW")
-    when(config.getString(InfluxSinkConfig.EXPORT_ROUTE_QUERY_CONFIG)).thenReturn(QUERY_SELECT_AND_TIMESTAMP_SYSTEM)
+    when(config.getString(InfluxSinkConfig.KCQL_CONFIG)).thenReturn(QUERY_SELECT_AND_TIMESTAMP_SYSTEM)
     val settings = InfluxSettings(config)
     settings.connectionUrl shouldBe url
     settings.database shouldBe database
@@ -188,7 +188,7 @@ class InfluxSettingsTest extends WordSpec with Matchers with MockitoSugar {
     when(config.getString(InfluxSinkConfig.INFLUX_CONNECTION_USER_CONFIG)).thenReturn(user)
     when(config.getString(InfluxSinkConfig.INFLUX_CONNECTION_PASSWORD_CONFIG)).thenReturn(null)
     when(config.getString(InfluxSinkConfig.ERROR_POLICY_CONFIG)).thenReturn("THROW")
-    when(config.getString(InfluxSinkConfig.EXPORT_ROUTE_QUERY_CONFIG)).thenReturn(QUERY_ALL_WITH_PRIMARY_KEY)
+    when(config.getString(InfluxSinkConfig.KCQL_CONFIG)).thenReturn(QUERY_ALL_WITH_PRIMARY_KEY)
     val settings = InfluxSettings(config)
     settings.connectionUrl shouldBe url
     settings.database shouldBe database
@@ -214,7 +214,7 @@ class InfluxSettingsTest extends WordSpec with Matchers with MockitoSugar {
     when(config.getString(InfluxSinkConfig.INFLUX_CONNECTION_USER_CONFIG)).thenReturn(user)
     when(config.getString(InfluxSinkConfig.INFLUX_CONNECTION_PASSWORD_CONFIG)).thenReturn(null)
     when(config.getString(InfluxSinkConfig.ERROR_POLICY_CONFIG)).thenReturn("THROW")
-    when(config.getString(InfluxSinkConfig.EXPORT_ROUTE_QUERY_CONFIG)).thenReturn(QUERY_ALL_WITH_PRIMARY_KEY_AND_TIMESTAMP)
+    when(config.getString(InfluxSinkConfig.KCQL_CONFIG)).thenReturn(QUERY_ALL_WITH_PRIMARY_KEY_AND_TIMESTAMP)
     val settings = InfluxSettings(config)
     settings.connectionUrl shouldBe url
     settings.database shouldBe database
@@ -239,7 +239,7 @@ class InfluxSettingsTest extends WordSpec with Matchers with MockitoSugar {
     when(config.getString(InfluxSinkConfig.INFLUX_CONNECTION_USER_CONFIG)).thenReturn(user)
     when(config.getString(InfluxSinkConfig.INFLUX_CONNECTION_PASSWORD_CONFIG)).thenReturn(null)
     when(config.getString(InfluxSinkConfig.ERROR_POLICY_CONFIG)).thenReturn("THROW")
-    when(config.getString(InfluxSinkConfig.EXPORT_ROUTE_QUERY_CONFIG)).thenReturn(QUERY_SELECT_WITH_PRIMARY_KEYS_AND_TIMESTAMP)
+    when(config.getString(InfluxSinkConfig.KCQL_CONFIG)).thenReturn(QUERY_SELECT_WITH_PRIMARY_KEYS_AND_TIMESTAMP)
     val settings = InfluxSettings(config)
     settings.connectionUrl shouldBe url
     settings.database shouldBe database

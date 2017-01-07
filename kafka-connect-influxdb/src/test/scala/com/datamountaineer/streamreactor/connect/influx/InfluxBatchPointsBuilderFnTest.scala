@@ -27,7 +27,6 @@ import org.apache.kafka.connect.sink.SinkRecord
 import org.influxdb.dto.Point
 import org.scalatest.{Matchers, WordSpec}
 
-
 class InfluxBatchPointsBuilderFnTest extends WordSpec with Matchers {
   "InfluxBatchPointsBuilderFn" should {
     "convert a sink record with a json string payload when all fields are selected" in {
@@ -234,7 +233,7 @@ class InfluxBatchPointsBuilderFnTest extends WordSpec with Matchers {
       map.get("address") shouldBe "316 Hoyt Street, Welda, Puerto Rico, 1474"
     }
 
-    "convert sink record with a json string payload with all fields selected and one aliased" in {
+    "convert a sink record with a json string payload with all fields selected and one aliased" in {
       val jsonPayload =
         """
           | {
@@ -444,7 +443,7 @@ class InfluxBatchPointsBuilderFnTest extends WordSpec with Matchers {
       }
     }
 
-    "convert a schemaless sink record when all fields are selected with the timestamp field within the payload" in {
+    "convert a schema-less sink record when all fields are selected with the timestamp field within the payload" in {
       val sourceMap = new util.HashMap[String, Any]()
       val s: Short = 123
       sourceMap.put("timestamp", s)
@@ -498,7 +497,7 @@ class InfluxBatchPointsBuilderFnTest extends WordSpec with Matchers {
       map.get("longitude") shouldBe "-141.645812"
     }
 
-    "convert a schemaless sink record when all fields are selected" in {
+    "convert a schema-less sink record when all fields are selected" in {
       val sourceMap = new util.HashMap[String, Any]()
       sourceMap.put("_id", "580151bca6f3a2f0577baaac")
       sourceMap.put("index", 0)
@@ -552,7 +551,7 @@ class InfluxBatchPointsBuilderFnTest extends WordSpec with Matchers {
       map.get("longitude") shouldBe "-141.645812"
     }
 
-    "convert a schema less sink record with fields ignored" in {
+    "convert a schema-less sink record with fields ignored" in {
       val sourceMap = new util.HashMap[String, Any]()
       sourceMap.put("_id", "580151bca6f3a2f0577baaac")
       sourceMap.put("index", 0)
@@ -604,8 +603,7 @@ class InfluxBatchPointsBuilderFnTest extends WordSpec with Matchers {
       map.get("address") shouldBe "316 Hoyt Street, Welda, Puerto Rico, 1474"
     }
 
-
-    "convert a schemaless sink record with all fields selected and one aliased" in {
+    "convert a schema-less sink record with all fields selected and one aliased" in {
       val sourceMap = new util.HashMap[String, Any]()
       sourceMap.put("_id", "580151bca6f3a2f0577baaac")
       sourceMap.put("index", 0)
@@ -659,7 +657,7 @@ class InfluxBatchPointsBuilderFnTest extends WordSpec with Matchers {
       map.get("longitude") shouldBe "-141.645812"
     }
 
-    "convert a schemaless sink record with specific fields being selected" in {
+    "convert a schema-less sink record with specific fields being selected" in {
       val sourceMap = new util.HashMap[String, Any]()
       sourceMap.put("_id", "580151bca6f3a2f0577baaac")
       sourceMap.put("index", 0)

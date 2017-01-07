@@ -68,8 +68,8 @@ object InfluxSettings {
     if (database == null || database.trim.isEmpty) {
       throw new ConfigException(s"$INFLUX_DATABASE_CONFIG is not set correctly")
     }
-    val raw = config.getString(InfluxSinkConfig.EXPORT_ROUTE_QUERY_CONFIG)
-    require(raw != null && !raw.isEmpty, s"No ${InfluxSinkConfig.EXPORT_ROUTE_QUERY_CONFIG} provided!")
+    val raw = config.getString(InfluxSinkConfig.KCQL_CONFIG)
+    require(raw != null && !raw.isEmpty, s"No ${InfluxSinkConfig.KCQL_CONFIG} provided!")
     val routes = raw.split(";").map(r => Config.parse(r)).toSet
     val errorPolicyE = ErrorPolicyEnum.withName(config.getString(InfluxSinkConfig.ERROR_POLICY_CONFIG).toUpperCase)
     val errorPolicy = ErrorPolicy(errorPolicyE)
