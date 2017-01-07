@@ -37,7 +37,7 @@ class StructFieldsExtractorTest extends WordSpec with Matchers {
         .put("age", 30)
 
       val min = System.currentTimeMillis()
-      val record = StructFieldsExtractor(true, Map.empty, None, Set.empty).get(struct)
+      val record = StructFieldsExtractor(includeAllFields = true, Map.empty, None, Set.empty).get(struct)
       val max = System.currentTimeMillis()
       (min <= record.timestamp && record.timestamp <= max) shouldBe true
       val map = record.fields.toMap
@@ -59,7 +59,7 @@ class StructFieldsExtractorTest extends WordSpec with Matchers {
         .put("age", 30)
 
       intercept[ConfigException] {
-        StructFieldsExtractor(true, Map.empty, Some("ts"), Set.empty).get(struct)
+        StructFieldsExtractor(includeAllFields = true, Map.empty, Some("ts"), Set.empty).get(struct)
       }
     }
 
@@ -75,15 +75,15 @@ class StructFieldsExtractorTest extends WordSpec with Matchers {
         .put("f", -5.93.toFloat)
 
       intercept[ConfigException] {
-        StructFieldsExtractor(true, Map.empty, Some("abc"), Set.empty).get(struct)
+        StructFieldsExtractor(includeAllFields = true, Map.empty, Some("abc"), Set.empty).get(struct)
       }
 
       intercept[ConfigException] {
-        StructFieldsExtractor(true, Map.empty, Some("d"), Set.empty).get(struct)
+        StructFieldsExtractor(includeAllFields = true, Map.empty, Some("d"), Set.empty).get(struct)
       }
 
       intercept[ConfigException] {
-        StructFieldsExtractor(true, Map.empty, Some("f"), Set.empty).get(struct)
+        StructFieldsExtractor(includeAllFields = true, Map.empty, Some("f"), Set.empty).get(struct)
       }
     }
 
@@ -100,7 +100,7 @@ class StructFieldsExtractorTest extends WordSpec with Matchers {
         .put("age", 30)
 
       intercept[RuntimeException] {
-        StructFieldsExtractor(true, Map.empty, None, Set.empty).get(struct)
+        StructFieldsExtractor(includeAllFields = true, Map.empty, None, Set.empty).get(struct)
       }
     }
 
