@@ -28,12 +28,15 @@ import org.scalatest.{Matchers, WordSpec}
 
 class InfluxSettingsTest extends WordSpec with Matchers with MockitoSugar {
 
-  val MEASURE_NAME = "someMeasurement"
+  val MEASURE_NAME = "influxMeasure"
   val TOPIC_NAME = "mykafkatopic"
   val QUERY_ALL = s"INSERT INTO $MEASURE_NAME SELECT * FROM $TOPIC_NAME"
   val QUERY_SELECT = s"INSERT INTO $MEASURE_NAME SELECT lastName as surname, firstName FROM $TOPIC_NAME"
   val QUERY_SELECT_AND_TIMESTAMP = s"INSERT INTO $MEASURE_NAME SELECT * FROM $TOPIC_NAME WITHTIMESTAMP ts"
   val QUERY_SELECT_AND_TIMESTAMP_SYSTEM = s"INSERT INTO $MEASURE_NAME SELECT * FROM $TOPIC_NAME WITHTIMESTAMP ${Config.TIMESTAMP}"
+  val QUERY_ALL_WITH_PRIMARY_KEY = s"INSERT INTO $MEASURE_NAME SELECT * FROM $TOPIC_NAME PK machineId"
+  val QUERY_ALL_WITH_PRIMARY_KEY_AND_TIMESTAMP = s"INSERT INTO $MEASURE_NAME SELECT * FROM $TOPIC_NAME PK machineId WITHTIMESTAMP ts"
+  val QUERY_SELECT_WITH_PRIMARY_KEYS_AND_TIMESTAMP = s"INSERT INTO $MEASURE_NAME SELECT actualTemperature, targetTemperature FROM $TOPIC_NAME PK machineId, type WITHTIMESTAMP ts"
 
   "raise a configuration exception if the connection url is missing" in {
     intercept[ConfigException] {
@@ -174,4 +177,83 @@ class InfluxSettingsTest extends WordSpec with Matchers with MockitoSugar {
     settings.fieldsExtractorMap(TOPIC_NAME).fieldsAliasMap shouldBe Map.empty
     settings.fieldsExtractorMap(TOPIC_NAME).timestampField shouldBe None
   }
+
+  "create a settings with all fields with one PK (primary key)" in {
+    val url = "http://localhost:8081"
+    val database = "mydatabase"
+    val user = "myuser"
+    val config = mock[InfluxSinkConfig]
+    when(config.getString(InfluxSinkConfig.INFLUX_URL_CONFIG)).thenReturn(url)
+    when(config.getString(InfluxSinkConfig.INFLUX_DATABASE_CONFIG)).thenReturn(database)
+    when(config.getString(InfluxSinkConfig.INFLUX_CONNECTION_USER_CONFIG)).thenReturn(user)
+    when(config.getString(InfluxSinkConfig.INFLUX_CONNECTION_PASSWORD_CONFIG)).thenReturn(null)
+    when(config.getString(InfluxSinkConfig.ERROR_POLICY_CONFIG)).thenReturn("THROW")
+    when(config.getString(InfluxSinkConfig.EXPORT_ROUTE_QUERY_CONFIG)).thenReturn(QUERY_ALL_WITH_PRIMARY_KEY)
+    val settings = InfluxSettings(config)
+    settings.connectionUrl shouldBe url
+    settings.database shouldBe database
+    settings.user shouldBe user
+    settings.password shouldBe null
+    settings.errorPolicy shouldBe ThrowErrorPolicy()
+    settings.topicToMeasurementMap shouldBe Map(TOPIC_NAME -> MEASURE_NAME)
+    settings.fieldsExtractorMap.size shouldBe 1
+    settings.fieldsExtractorMap(TOPIC_NAME).includeAllFields shouldBe true
+    settings.fieldsExtractorMap(TOPIC_NAME).fieldsAliasMap shouldBe Map.empty
+    settings.fieldsExtractorMap(TOPIC_NAME).timestampField shouldBe None
+    settings.fieldsExtractorMap(TOPIC_NAME).timestampField shouldBe None
+    settings.pks shouldBe Set(List("machineId"))
+  }
+
+  "create a settings with all fields with one PK definition and timestamp" in {
+    val url = "http://localhost:8081"
+    val database = "mydatabase"
+    val user = "myuser"
+    val config = mock[InfluxSinkConfig]
+    when(config.getString(InfluxSinkConfig.INFLUX_URL_CONFIG)).thenReturn(url)
+    when(config.getString(InfluxSinkConfig.INFLUX_DATABASE_CONFIG)).thenReturn(database)
+    when(config.getString(InfluxSinkConfig.INFLUX_CONNECTION_USER_CONFIG)).thenReturn(user)
+    when(config.getString(InfluxSinkConfig.INFLUX_CONNECTION_PASSWORD_CONFIG)).thenReturn(null)
+    when(config.getString(InfluxSinkConfig.ERROR_POLICY_CONFIG)).thenReturn("THROW")
+    when(config.getString(InfluxSinkConfig.EXPORT_ROUTE_QUERY_CONFIG)).thenReturn(QUERY_ALL_WITH_PRIMARY_KEY_AND_TIMESTAMP)
+    val settings = InfluxSettings(config)
+    settings.connectionUrl shouldBe url
+    settings.database shouldBe database
+    settings.user shouldBe user
+    settings.password shouldBe null
+    settings.errorPolicy shouldBe ThrowErrorPolicy()
+    settings.topicToMeasurementMap shouldBe Map(TOPIC_NAME -> MEASURE_NAME)
+    settings.fieldsExtractorMap.size shouldBe 1
+    settings.fieldsExtractorMap(TOPIC_NAME).includeAllFields shouldBe true
+    settings.fieldsExtractorMap(TOPIC_NAME).fieldsAliasMap shouldBe Map.empty
+    settings.fieldsExtractorMap(TOPIC_NAME).timestampField shouldBe Some("ts")
+    settings.pks shouldBe Set(List("machineId"))
+  }
+
+  "create a settings with selected fields with two primary-keys (PK) and timestamp" in {
+    val url = "http://localhost:8081"
+    val database = "mydatabase"
+    val user = "myuser"
+    val config = mock[InfluxSinkConfig]
+    when(config.getString(InfluxSinkConfig.INFLUX_URL_CONFIG)).thenReturn(url)
+    when(config.getString(InfluxSinkConfig.INFLUX_DATABASE_CONFIG)).thenReturn(database)
+    when(config.getString(InfluxSinkConfig.INFLUX_CONNECTION_USER_CONFIG)).thenReturn(user)
+    when(config.getString(InfluxSinkConfig.INFLUX_CONNECTION_PASSWORD_CONFIG)).thenReturn(null)
+    when(config.getString(InfluxSinkConfig.ERROR_POLICY_CONFIG)).thenReturn("THROW")
+    when(config.getString(InfluxSinkConfig.EXPORT_ROUTE_QUERY_CONFIG)).thenReturn(QUERY_SELECT_WITH_PRIMARY_KEYS_AND_TIMESTAMP)
+    val settings = InfluxSettings(config)
+    settings.connectionUrl shouldBe url
+    settings.database shouldBe database
+    settings.user shouldBe user
+    settings.password shouldBe null
+    settings.errorPolicy shouldBe ThrowErrorPolicy()
+    settings.topicToMeasurementMap shouldBe Map(TOPIC_NAME -> MEASURE_NAME)
+    settings.fieldsExtractorMap.size shouldBe 1
+    settings.fieldsExtractorMap(TOPIC_NAME).includeAllFields shouldBe false
+    settings.fieldsExtractorMap(TOPIC_NAME).fieldsAliasMap shouldBe Map(
+      "actualTemperature" -> "actualTemperature",
+      "targetTemperature" -> "targetTemperature")
+    settings.fieldsExtractorMap(TOPIC_NAME).timestampField shouldBe Some("ts")
+    settings.pks shouldBe Set(List("machineId", "type"))
+  }
+
 }
