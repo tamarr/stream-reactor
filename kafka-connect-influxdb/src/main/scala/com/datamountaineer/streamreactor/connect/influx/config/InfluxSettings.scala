@@ -33,6 +33,7 @@ case class InfluxSettings(connectionUrl: String,
                           retentionPolicy: String,
                           topicToMeasurementMap: Map[String, String],
                           fieldsExtractorMap: Map[String, StructFieldsExtractor],
+                          pks: Set[List[String]],
                           errorPolicy: ErrorPolicy = new ThrowErrorPolicy,
                           maxRetries: Int = InfluxSinkConfig.NBR_OF_RETIRES_DEFAULT)
 
@@ -84,6 +85,8 @@ object InfluxSettings {
       (rm.getSource, StructFieldsExtractor(rm.isIncludeAllFields, fields(rm.getSource), timestampField, rm.getIgnoredField.toSet))
     }.toMap
 
+    val pks = routes.map { _.getPrimaryKeys.toList }
+
     val retentionPolicy = config.getString(RETENTION_POLICY_CONFIG)
     new InfluxSettings(url,
       user,
@@ -92,6 +95,7 @@ object InfluxSettings {
       retentionPolicy,
       routes.map(r => r.getSource -> r.getTarget).toMap,
       extractorFields,
+      pks,
       errorPolicy,
       nbrOfRetries)
   }

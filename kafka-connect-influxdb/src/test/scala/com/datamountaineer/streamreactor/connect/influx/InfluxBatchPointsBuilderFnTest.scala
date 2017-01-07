@@ -58,8 +58,8 @@ class InfluxBatchPointsBuilderFnTest extends WordSpec with Matchers {
 
       val record = new SinkRecord(topic, 0, null, null, Schema.STRING_SCHEMA, jsonPayload, 0)
 
-      val extractor = StructFieldsExtractor(true, Map.empty, None, ignoredFields = Set.empty)
-      val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor))
+      val extractor = StructFieldsExtractor(includeAllFields = true, Map.empty, None, ignoredFields = Set.empty)
+      val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor), pks = Set())
       val batchPoints = InfluxBatchPointsBuilderFn(Seq(record), settings)
       val points = batchPoints.getPoints
       points.size() shouldBe 1
@@ -113,12 +113,10 @@ class InfluxBatchPointsBuilderFnTest extends WordSpec with Matchers {
       val topic = "topic1"
       val measurement = "measurement1"
 
-      val before = System.currentTimeMillis()
-
       val record = new SinkRecord(topic, 0, null, null, Schema.STRING_SCHEMA, jsonPayload, 0)
 
-      val extractor = StructFieldsExtractor(true, Map.empty, Some("timestamp"), Set.empty)
-      val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor))
+      val extractor = StructFieldsExtractor(includeAllFields = true, Map.empty, Some("timestamp"), Set.empty)
+      val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor), pks = Set())
       val batchPoints = InfluxBatchPointsBuilderFn(Seq(record), settings)
       val points = batchPoints.getPoints
       points.size() shouldBe 1
@@ -171,12 +169,10 @@ class InfluxBatchPointsBuilderFnTest extends WordSpec with Matchers {
       val topic = "topic1"
       val measurement = "measurement1"
 
-      val before = System.currentTimeMillis()
-
       val record = new SinkRecord(topic, 0, null, null, Schema.STRING_SCHEMA, jsonPayload, 0)
 
-      val extractor = StructFieldsExtractor(true, Map.empty, Some("timestamp"), Set.empty)
-      val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor))
+      val extractor = StructFieldsExtractor(includeAllFields = true, Map.empty, Some("timestamp"), Set.empty)
+      val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor), pks = Set())
       intercept[RuntimeException] {
         InfluxBatchPointsBuilderFn(Seq(record), settings)
       }
@@ -210,8 +206,8 @@ class InfluxBatchPointsBuilderFnTest extends WordSpec with Matchers {
 
       val record = new SinkRecord(topic, 0, null, null, Schema.STRING_SCHEMA, jsonPayload, 0)
 
-      val extractor = StructFieldsExtractor(true, Map.empty, None, Set("longitude", "latitude"))
-      val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor))
+      val extractor = StructFieldsExtractor(includeAllFields = true, Map.empty, None, Set("longitude", "latitude"))
+      val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor), pks = Set())
       val batchPoints = InfluxBatchPointsBuilderFn(Seq(record), settings)
       val points = batchPoints.getPoints
       points.size() shouldBe 1
@@ -267,8 +263,8 @@ class InfluxBatchPointsBuilderFnTest extends WordSpec with Matchers {
 
     val record = new SinkRecord(topic, 0, null, null, Schema.STRING_SCHEMA, jsonPayload, 0)
 
-    val extractor = StructFieldsExtractor(true, Map("name" -> "this_is_renamed"), None, Set.empty)
-    val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor))
+    val extractor = StructFieldsExtractor(includeAllFields = true, Map("name" -> "this_is_renamed"), None, Set.empty)
+    val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor), pks = Set())
     val batchPoints = InfluxBatchPointsBuilderFn(Seq(record), settings)
     val points = batchPoints.getPoints
     points.size() shouldBe 1
@@ -325,8 +321,8 @@ class InfluxBatchPointsBuilderFnTest extends WordSpec with Matchers {
 
     val record = new SinkRecord(topic, 0, null, null, Schema.STRING_SCHEMA, jsonPayload, 0)
 
-    val extractor = StructFieldsExtractor(false, Map("_id" -> "_id", "name" -> "this_is_renamed", "email" -> "email"), None, Set.empty)
-    val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor))
+    val extractor = StructFieldsExtractor(includeAllFields = false, Map("_id" -> "_id", "name" -> "this_is_renamed", "email" -> "email"), None, Set.empty)
+    val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor), pks = Set())
     val batchPoints = InfluxBatchPointsBuilderFn(Seq(record), settings)
     val points = batchPoints.getPoints
     points.size() shouldBe 1
@@ -360,12 +356,10 @@ class InfluxBatchPointsBuilderFnTest extends WordSpec with Matchers {
     val topic = "topic1"
     val measurement = "measurement1"
 
-    val before = System.currentTimeMillis()
-
     val record = new SinkRecord(topic, 0, null, null, Schema.STRING_SCHEMA, jsonPayload, 0)
 
-    val extractor = StructFieldsExtractor(true, Map.empty, None, Set.empty)
-    val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor))
+    val extractor = StructFieldsExtractor(includeAllFields = true, Map.empty, None, Set.empty)
+    val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor), pks = Set())
     intercept[RuntimeException] {
       InfluxBatchPointsBuilderFn(Seq(record), settings)
     }
@@ -389,12 +383,10 @@ class InfluxBatchPointsBuilderFnTest extends WordSpec with Matchers {
     val topic = "topic1"
     val measurement = "measurement1"
 
-    val before = System.currentTimeMillis()
-
     val record = new SinkRecord(topic, 0, null, null, Schema.STRING_SCHEMA, jsonPayload, 0)
 
-    val extractor = StructFieldsExtractor(true, Map.empty, None, Set.empty)
-    val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor))
+    val extractor = StructFieldsExtractor(includeAllFields = true, Map.empty, None, Set.empty)
+    val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor), pks = Set())
     intercept[RuntimeException] {
       InfluxBatchPointsBuilderFn(Seq(record), settings)
     }
@@ -422,12 +414,10 @@ class InfluxBatchPointsBuilderFnTest extends WordSpec with Matchers {
     val topic = "topic1"
     val measurement = "measurement1"
 
-    val before = System.currentTimeMillis()
-
     val record = new SinkRecord(topic, 0, null, null, null, sourceMap, 0)
 
-    val extractor = StructFieldsExtractor(true, Map.empty, Some("timestamp"), Set.empty)
-    val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor))
+    val extractor = StructFieldsExtractor(includeAllFields = true, Map.empty, Some("timestamp"), Set.empty)
+    val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor), pks = Set())
     intercept[RuntimeException] {
       InfluxBatchPointsBuilderFn(Seq(record), settings)
     }
@@ -455,12 +445,10 @@ class InfluxBatchPointsBuilderFnTest extends WordSpec with Matchers {
     val topic = "topic1"
     val measurement = "measurement1"
 
-    val before = System.currentTimeMillis()
-
     val record = new SinkRecord(topic, 0, null, null, null, sourceMap, 0)
 
-    val extractor = StructFieldsExtractor(true, Map.empty, Some("timestamp"), Set.empty)
-    val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor))
+    val extractor = StructFieldsExtractor(includeAllFields = true, Map.empty, Some("timestamp"), Set.empty)
+    val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor), pks = Set())
     val batchPoints = InfluxBatchPointsBuilderFn(Seq(record), settings)
     val points = batchPoints.getPoints
     points.size() shouldBe 1
@@ -512,8 +500,8 @@ class InfluxBatchPointsBuilderFnTest extends WordSpec with Matchers {
 
     val record = new SinkRecord(topic, 0, null, null, null, sourceMap, 0)
 
-    val extractor = StructFieldsExtractor(true, Map.empty, None, Set.empty)
-    val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor))
+    val extractor = StructFieldsExtractor(includeAllFields = true, Map.empty, None, Set.empty)
+    val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor), pks = Set())
     val batchPoints = InfluxBatchPointsBuilderFn(Seq(record), settings)
     val points = batchPoints.getPoints
     points.size() shouldBe 1
@@ -566,8 +554,8 @@ class InfluxBatchPointsBuilderFnTest extends WordSpec with Matchers {
 
     val record = new SinkRecord(topic, 0, null, null, null, sourceMap, 0)
 
-    val extractor = StructFieldsExtractor(true, Map.empty, None, Set("longitude", "latitude"))
-    val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor))
+    val extractor = StructFieldsExtractor(includeAllFields = true, Map.empty, None, Set("longitude", "latitude"))
+    val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor), pks = Set())
     val batchPoints = InfluxBatchPointsBuilderFn(Seq(record), settings)
     val points = batchPoints.getPoints
     points.size() shouldBe 1
@@ -620,7 +608,7 @@ class InfluxBatchPointsBuilderFnTest extends WordSpec with Matchers {
     val record = new SinkRecord(topic, 0, null, null, null, sourceMap, 0)
 
     val extractor = StructFieldsExtractor(true, Map("name" -> "this_is_renamed"), None, Set.empty)
-    val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor))
+    val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor), pks = Set())
     val batchPoints = InfluxBatchPointsBuilderFn(Seq(record), settings)
     val points = batchPoints.getPoints
     points.size() shouldBe 1
@@ -674,7 +662,7 @@ class InfluxBatchPointsBuilderFnTest extends WordSpec with Matchers {
     val record = new SinkRecord(topic, 0, null, null, null, sourceMap, 0)
 
     val extractor = StructFieldsExtractor(false, Map("_id" -> "_id", "name" -> "this_is_renamed", "email" -> "email"), None, Set.empty)
-    val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor))
+    val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor), pks = Set())
     val batchPoints = InfluxBatchPointsBuilderFn(Seq(record), settings)
     val points = batchPoints.getPoints
     points.size() shouldBe 1
@@ -714,11 +702,9 @@ class InfluxBatchPointsBuilderFnTest extends WordSpec with Matchers {
     val topic = "topic1"
     val measurement = "measurement1"
 
-    val before = System.currentTimeMillis()
-
     val record = new SinkRecord(topic, 0, null, null, null, sourceMap, 0)
-    val extractor = StructFieldsExtractor(true, Map.empty, None, Set.empty)
-    val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor))
+    val extractor = StructFieldsExtractor(includeAllFields = true, Map.empty, None, Set.empty)
+    val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor), pks = Set())
     intercept[RuntimeException] {
       InfluxBatchPointsBuilderFn(Seq(record), settings)
     }
@@ -745,12 +731,10 @@ class InfluxBatchPointsBuilderFnTest extends WordSpec with Matchers {
     val topic = "topic1"
     val measurement = "measurement1"
 
-    val before = System.currentTimeMillis()
-
     val record = new SinkRecord(topic, 0, null, null, null, sourceMap, 0)
 
-    val extractor = StructFieldsExtractor(true, Map.empty, None, Set.empty)
-    val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor))
+    val extractor = StructFieldsExtractor(includeAllFields = true, Map.empty, None, Set.empty)
+    val settings = InfluxSettings("connection", "user", "password", "database1", "autogen", Map(topic -> measurement), Map(topic -> extractor), pks = Set())
     intercept[RuntimeException] {
       InfluxBatchPointsBuilderFn(Seq(record), settings)
     }
