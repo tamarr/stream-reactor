@@ -26,40 +26,56 @@ import org.apache.kafka.common.config.{AbstractConfig, ConfigDef}
 object RedisSinkConfig {
 
   val REDIS_HOST = "connect.redis.connection.host"
-  val REDIS_HOST_DOC: String =
+  val REDIS_HOST_DOC =
     """
       |Specifies the redis server
     """.stripMargin
 
   val REDIS_PORT = "connect.redis.connection.port"
-  val REDIS_PORT_DOC: String =
+  val REDIS_PORT_DOC =
     """
       |Specifies the redis connection port
     """.stripMargin
 
   val REDIS_PASSWORD = "connect.redis.connection.password"
-  val REDIS_PASSWORD_DOC: String =
+  val REDIS_PASSWORD_DOC =
     """
       |Provides the password for the redis connection.
     """.stripMargin
 
   val KCQL_CONFIG = "connect.redis.sink.kcql"
-  val KCQL_DOC = "KCQL expression describing field selection and routes."
+  val KCQL_DOC =
+    """
+      |KCQL expression describing field selection and routes.
+    """.stripMargin
 
   val ERROR_POLICY = "connect.redis.error.policy"
-  val ERROR_POLICY_DOC: String = "Specifies the action to be taken if an error occurs while inserting the data.\n" +
-    "There are two available options: \n" + "NOOP - the error is swallowed \n" +
-    "THROW - the error is allowed to propagate. \n" +
-    "RETRY - The exception causes the Connect framework to retry the message. The number of retries is based on \n" +
-    "The error will be logged automatically"
   val ERROR_POLICY_DEFAULT = "THROW"
+  val ERROR_POLICY_DOC =
+    """
+      |Specifies the action to be taken if an error occurs while inserting the data.
+      |
+      |The following actions are available:
+      |  NOOP - the error is swallowed.
+      |  THROW - the error is allowed to propagate.
+      |  RETRY - The exception causes the Connect framework to retry the message. The number of retries is based on 'connect.redis.max.retires'
+      |
+      |Errors are always logged
+    """.stripMargin
 
   val ERROR_RETRY_INTERVAL = "connect.redis.retry.interval"
-  val ERROR_RETRY_INTERVAL_DOC = "The time in milliseconds between retries."
   val ERROR_RETRY_INTERVAL_DEFAULT = "60000"
+  val ERROR_RETRY_INTERVAL_DOC =
+    """
+      |The time in milliseconds between retries.
+    """.stripMargin
+
   val NBR_OF_RETRIES = "connect.redis.max.retires"
-  val NBR_OF_RETRIES_DOC = "The maximum number of times to try the write again."
   val NBR_OF_RETIRES_DEFAULT = 20
+  val NBR_OF_RETRIES_DOC =
+    """
+      |The maximum number of times to try the write again.
+    """.stripMargin
 
   val config: ConfigDef = new ConfigDef()
     .define(REDIS_HOST, Type.STRING, Importance.HIGH, REDIS_HOST_DOC,
