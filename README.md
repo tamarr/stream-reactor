@@ -50,7 +50,8 @@ Supports limited SQL statements to stream and select from Kafka topics in real t
 
 **0.2.4** (In progress)
 
-*   Added FTP and HTTO Source.
+*   Added FTP and HTTP Source.
+*   InfluxDB support for indexes via PK.
 
 **0.2.3** (5 Jan 2017)
 
