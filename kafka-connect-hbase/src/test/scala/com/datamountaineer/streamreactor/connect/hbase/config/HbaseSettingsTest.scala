@@ -1,22 +1,21 @@
 /*
- *  Copyright 2017 Datamountaineer.
+ * Copyright 2017 Datamountaineer.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.datamountaineer.streamreactor.connect.hbase.config
 
-import com.datamountaineer.streamreactor.connect.hbase.config.HbaseSinkConfig._
 import com.datamountaineer.streamreactor.connect.hbase.{GenericRowKeyBuilderBytes, StructFieldsRowKeyBuilderBytes}
 import org.apache.kafka.common.config.ConfigException
 import org.mockito.Mockito._
@@ -39,8 +38,8 @@ class HbaseSettingsTest extends WordSpec with Matchers with MockitoSugar {
   "raise a configuration exception if the column family is empty" in {
     intercept[ConfigException] {
       val config = mock[HbaseSinkConfig]
-      when(config.getString(COLUMN_FAMILY)).thenReturn("")
-      when(config.getString(HbaseSinkConfig.ERROR_POLICY)).thenReturn("THROW")
+      when(config.getString(HbaseSinkConfigConstants.COLUMN_FAMILY)).thenReturn("")
+      when(config.getString(HbaseSinkConfigConstants.ERROR_POLICY)).thenReturn("THROW")
       HbaseSettings(config)
     }
   }
@@ -49,9 +48,9 @@ class HbaseSettingsTest extends WordSpec with Matchers with MockitoSugar {
     val config = mock[HbaseSinkConfig]
     val columnFamily = "somecolumnFamily"
 
-    when(config.getString(COLUMN_FAMILY)).thenReturn(columnFamily)
-    when(config.getString(EXPORT_ROUTE_QUERY)).thenReturn(QUERY_ALL_KEYS)
-    when(config.getString(HbaseSinkConfig.ERROR_POLICY)).thenReturn("THROW")
+    when(config.getString(HbaseSinkConfigConstants.COLUMN_FAMILY)).thenReturn(columnFamily)
+    when(config.getString(HbaseSinkConfigConstants.EXPORT_ROUTE_QUERY)).thenReturn(QUERY_ALL_KEYS)
+    when(config.getString(HbaseSinkConfigConstants.ERROR_POLICY)).thenReturn("THROW")
 
     val settings = HbaseSettings(config)
     val route = settings.routes.head
@@ -67,9 +66,9 @@ class HbaseSettingsTest extends WordSpec with Matchers with MockitoSugar {
     val config = mock[HbaseSinkConfig]
     val columnFamily = "somecolumnFamily"
 
-    when(config.getString(COLUMN_FAMILY)).thenReturn(columnFamily)
-    when(config.getString(EXPORT_ROUTE_QUERY)).thenReturn(QUERY_ALL)
-    when(config.getString(HbaseSinkConfig.ERROR_POLICY)).thenReturn("THROW")
+    when(config.getString(HbaseSinkConfigConstants.COLUMN_FAMILY)).thenReturn(columnFamily)
+    when(config.getString(HbaseSinkConfigConstants.EXPORT_ROUTE_QUERY)).thenReturn(QUERY_ALL)
+    when(config.getString(HbaseSinkConfigConstants.ERROR_POLICY)).thenReturn("THROW")
 
     val settings = HbaseSettings(config)
 
@@ -85,9 +84,9 @@ class HbaseSettingsTest extends WordSpec with Matchers with MockitoSugar {
     val config = mock[HbaseSinkConfig]
     val columnFamily = "somecolumnFamily"
 
-    when(config.getString(COLUMN_FAMILY)).thenReturn(columnFamily)
-    when(config.getString(EXPORT_ROUTE_QUERY)).thenReturn(QUERY_SELECT)
-    when(config.getString(HbaseSinkConfig.ERROR_POLICY)).thenReturn("THROW")
+    when(config.getString(HbaseSinkConfigConstants.COLUMN_FAMILY)).thenReturn(columnFamily)
+    when(config.getString(HbaseSinkConfigConstants.EXPORT_ROUTE_QUERY)).thenReturn(QUERY_SELECT)
+    when(config.getString(HbaseSinkConfigConstants.ERROR_POLICY)).thenReturn("THROW")
 
     val settings = HbaseSettings(config)
     val route = settings.routes.head
@@ -108,9 +107,9 @@ class HbaseSettingsTest extends WordSpec with Matchers with MockitoSugar {
     val config = mock[HbaseSinkConfig]
     val columnFamily = "somecolumnFamily"
 
-    when(config.getString(COLUMN_FAMILY)).thenReturn(columnFamily)
-    when(config.getString(EXPORT_ROUTE_QUERY)).thenReturn(QUERY_SELECT_KEYS)
-    when(config.getString(HbaseSinkConfig.ERROR_POLICY)).thenReturn("THROW")
+    when(config.getString(HbaseSinkConfigConstants.COLUMN_FAMILY)).thenReturn(columnFamily)
+    when(config.getString(HbaseSinkConfigConstants.EXPORT_ROUTE_QUERY)).thenReturn(QUERY_SELECT_KEYS)
+    when(config.getString(HbaseSinkConfigConstants.ERROR_POLICY)).thenReturn("THROW")
 
     val settings = HbaseSettings(config)
     val route = settings.routes.head
@@ -127,14 +126,14 @@ class HbaseSettingsTest extends WordSpec with Matchers with MockitoSugar {
     fields.last.getAlias shouldBe "firstName"
   }
 
-//  "raise an exception when the row key builder is set to FIELDS but pks not in query map" in {
-//    intercept[java.lang.IllegalArgumentException] {
-//      val config = mock[HbaseSinkConfig]
-//      val columnFamily = "somecolumnFamily"
-//      when(config.getString(EXPORT_ROUTE_QUERY)).thenReturn(QUERY_SELECT_KEYS_BAD) //set keys in select
-//      when(config.getString(COLUMN_FAMILY)).thenReturn(columnFamily)
-//      when(config.getString(HbaseSinkConfig.ERROR_POLICY)).thenReturn("THROW")
-//      HbaseSettings(config)
-//    }
-//  }
+  //  "raise an exception when the row key builder is set to FIELDS but pks not in query map" in {
+  //    intercept[java.lang.IllegalArgumentException] {
+  //      val config = mock[HbaseSinkConfig]
+  //      val columnFamily = "somecolumnFamily"
+  //      when(config.getString(EXPORT_ROUTE_QUERY)).thenReturn(QUERY_SELECT_KEYS_BAD) //set keys in select
+  //      when(config.getString(COLUMN_FAMILY)).thenReturn(columnFamily)
+  //      when(config.getString(HbaseSinkConfig.ERROR_POLICY)).thenReturn("THROW")
+  //      HbaseSettings(config)
+  //    }
+  //  }
 }

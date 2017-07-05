@@ -1,24 +1,24 @@
 /*
- *  Copyright 2017 Datamountaineer.
+ * Copyright 2017 Datamountaineer.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.datamountaineer.streamreactor.connect.kudu
 
 import com.datamountaineer.kafka.EmbeddedSingleNodeKafkaCluster
 import com.datamountaineer.kafka.schemaregistry.RestApp
-import com.datamountaineer.streamreactor.connect.kudu.config.{KuduSettings, KuduSinkConfig}
+import com.datamountaineer.streamreactor.connect.kudu.config.{KuduSettings, KuduSinkConfig, KuduSinkConfigConstants}
 import com.datamountaineer.streamreactor.connect.kudu.sink.{CreateTableProps, DbHandler}
 import io.confluent.kafka.schemaregistry.client.rest.RestService
 import org.apache.kafka.connect.errors.ConnectException
@@ -80,7 +80,7 @@ class TestDbHandler extends TestBase with MockitoSugar with KuduConverter {
     val config = new KuduSinkConfig(getConfigAutoCreate(""))
     val settings = KuduSettings(config)
 
-    val creates = settings.routes.map(r=>DbHandler.getKuduSchema(r, schema))
+    val creates = settings.routes.map(r => DbHandler.getKuduSchema(r, schema))
     val create = creates.head
     create.getColumnCount shouldBe 8
     create.getPrimaryKeyColumnCount shouldBe 2
@@ -100,7 +100,7 @@ class TestDbHandler extends TestBase with MockitoSugar with KuduConverter {
     val config = new KuduSinkConfig(getConfigAutoCreate(""))
     val settings = KuduSettings(config)
 
-    val creates = settings.routes.map(r=>DbHandler.getKuduSchema(r, schemaDefaults))
+    val creates = settings.routes.map(r => DbHandler.getKuduSchema(r, schemaDefaults))
     val create = creates.head
     create.getColumnCount shouldBe 8
     create.getPrimaryKeyColumnCount shouldBe 2
@@ -156,8 +156,8 @@ class TestDbHandler extends TestBase with MockitoSugar with KuduConverter {
     cluster.start()
     val sr = new RestApp(8081, cluster.zKConnectString(), "_schemas")
     sr.start()
+    Thread.sleep(3000)
     val srClient = new RestService("http://localhost:8081")
-
     val rawSchema: String =
       """
         |{"type":"record","name":"myrecord",
@@ -188,7 +188,7 @@ class TestDbHandler extends TestBase with MockitoSugar with KuduConverter {
     val kuduSchemas = DbHandler.createTableProps(
       Set(rawSchema),
       settings.routes.head,
-      config.getString(KuduSinkConfig.SCHEMA_REGISTRY_URL),
+      config.getString(KuduSinkConfigConstants.SCHEMA_REGISTRY_URL),
       client)
 
     val kuduSchema = kuduSchemas.head.schema
@@ -220,7 +220,7 @@ class TestDbHandler extends TestBase with MockitoSugar with KuduConverter {
     val record: SinkRecord = getTestRecords.head
     val config = new KuduSinkConfig(getConfigAutoCreate(""))
     val settings = KuduSettings(config)
-    val ret = DbHandler.createTableFromSinkRecord( settings.routes.head, record.valueSchema(), client)
+    val ret = DbHandler.createTableFromSinkRecord(settings.routes.head, record.valueSchema(), client)
     ret.isInstanceOf[Try[KuduTable]] shouldBe true
   }
 }

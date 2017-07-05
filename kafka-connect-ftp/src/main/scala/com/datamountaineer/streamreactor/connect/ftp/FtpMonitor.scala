@@ -1,23 +1,23 @@
 /*
- *  Copyright 2017 Datamountaineer.
+ * Copyright 2017 Datamountaineer.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.datamountaineer.streamreactor.connect.ftp
 
 import java.io.ByteArrayOutputStream
-import java.nio.file.{FileSystems, Paths}
+import java.nio.file.{FileSystems, Path, Paths}
 import java.time.{Duration, Instant}
 import java.util
 
@@ -46,15 +46,15 @@ case class FetchedFile(meta:FileMetaData, body: Array[Byte])
 
 // org.apache.commons.net.ftp.FTPFile only contains the relative path
 case class AbsoluteFtpFile(ftpFile:FTPFile, parentDir:String) {
-  def path = Paths.get(parentDir, ftpFile.getName).toString
+  def path: String = Paths.get(parentDir, ftpFile.getName).toString
   def age: Duration = Duration.between(ftpFile.getTimestamp.toInstant,Instant.now)
 }
 
 // tells to monitor which directory and how files are dealt with, might be better a trait and is TODO
 case class MonitoredPath(path:String, tail:Boolean) {
-  val p = Paths.get(if (path.endsWith("/")) path + "*" else path)
+  val p: Path = Paths.get(if (path.endsWith("/")) path + "*" else path)
 
-  val pattern = p.getFileName.toString  // glob
+  val pattern: String = p.getFileName.toString  // glob
   val baseDirectory:String = p.getParent.toString match {
     case pp if pp.endsWith("/") => pp
     case pp => pp + "/"
@@ -81,7 +81,7 @@ trait FileMetaDataStore {
 }
 
 class FtpMonitor(settings:FtpMonitorSettings, knownFiles: FileMetaDataStore) extends StrictLogging {
-  val MaxAge = settings.maxAge.getOrElse(Duration.ofDays(Long.MaxValue))
+  val MaxAge: Duration = settings.maxAge.getOrElse(Duration.ofDays(Long.MaxValue))
 
   val ftp = new FTPClient()
 
@@ -136,7 +136,7 @@ class FtpMonitor(settings:FtpMonitorSettings, knownFiles: FileMetaDataStore) ext
           logger.info(s"dump entire ${current.meta.attribs.path}")
           (current.meta.inspectedNow().modifiedNow(), Some(FileBody(current.body,0)))
         }
-      case Some(previouslyKnownFile) =>
+      case Some(_) =>
         // file didn't change
         logger.info(s"fetched ${current.meta.attribs.path}, it was known before and it didn't change")
         (current.meta.inspectedNow(), None)
@@ -188,7 +188,7 @@ class FtpMonitor(settings:FtpMonitorSettings, knownFiles: FileMetaDataStore) ext
     val fetchResults = toBeFetched zip previouslyKnown map { case (f, k) => fetch(f, k) }
 
     toBeFetched zip previouslyKnown zip fetchResults map { case((a,b),c) => (a,b,c)} flatMap {
-      case (ftpFile, optPrevKnown, Success(currentFile)) => Some(handleFetchedFile(w, optPrevKnown, currentFile))
+      case (_, optPrevKnown, Success(currentFile)) => Some(handleFetchedFile(w, optPrevKnown, currentFile))
       case (ftpFile, _, Failure(err)) =>
         logger.warn(s"failed to fetch ${ftpFile.path}: ${err.toString}")
         None

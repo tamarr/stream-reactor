@@ -1,24 +1,24 @@
-/**
-  * Copyright 2017 Datamountaineer.
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  * http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  **/
+/*
+ * Copyright 2017 Datamountaineer.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.datamountaineer.streamreactor.connect.azure.documentdb.sink
 
 import com.datamountaineer.connector.config.WriteModeEnum
 import com.datamountaineer.streamreactor.connect.azure.documentdb.DocumentClientProvider
-import com.datamountaineer.streamreactor.connect.azure.documentdb.config.{DocumentDbConfig, DocumentDbSinkSettings}
+import com.datamountaineer.streamreactor.connect.azure.documentdb.config.{DocumentDbConfig, DocumentDbConfigConstants, DocumentDbSinkSettings}
 import com.datamountaineer.streamreactor.connect.errors.{ErrorHandler, ErrorPolicyEnum}
 import com.datamountaineer.streamreactor.connect.schemas.ConverterUtil
 import com.microsoft.azure.documentdb._
@@ -33,10 +33,6 @@ import scala.util.{Failure, Success, Try}
   * Writes a list of Kafka connect sink records to Azure DocumentDb using the JSON support.
   */
 class DocumentDbWriter(settings: DocumentDbSinkSettings, documentClient: DocumentClient) extends StrictLogging with ConverterUtil with ErrorHandler {
-  private val database = Try(documentClient.readDatabase(s"dbs/${settings.database}", null).getResource) match {
-    case Failure(e) => throw new RuntimeException(s"Could not identify database ${settings.database}", e)
-    case Success(d) => d
-  }
 
   private val configMap = settings.kcql
     .map { c =>
@@ -45,7 +41,6 @@ class DocumentDbWriter(settings: DocumentDbSinkSettings, documentClient: Documen
       }
       c.getSource -> c
     }.toMap
-
 
   //initialize error tracker
   initialize(settings.taskRetries, settings.errorPolicy)
@@ -72,25 +67,24 @@ class DocumentDbWriter(settings: DocumentDbSinkSettings, documentClient: Documen
     **/
   private def insert(records: Seq[SinkRecord]) = {
     try {
-      records.groupBy(_.topic()).foreach { case (topic, groupedRecords) =>
-        val config = configMap(topic)
+      records.groupBy(_.topic()).foreach { case (_, groupedRecords) =>
         groupedRecords.foreach { record =>
           val (document, keysAndValues) = SinkRecordToDocument(
             record,
             settings.keyBuilderMap.getOrElse(record.topic(), Set.empty)
           )(settings)
 
-          val key = keysAndValues.flatMap { case (f, v) => Option(v) }.mkString(".")
+          val key = keysAndValues.flatMap { case (_, v) => Option(v) }.mkString(".")
           if (key.nonEmpty) {
             document.setId(key)
           }
           val config = configMap.getOrElse(record.topic(), sys.error(s"${record.topic()} is not handled by the configuration."))
           config.getWriteMode match {
             case WriteModeEnum.INSERT =>
-              documentClient.createDocument(config.getTarget, document, requestOptionsInsert, key.nonEmpty).getResource
+              documentClient.createDocument(s"dbs/${settings.database}/colls/${config.getTarget}", document, requestOptionsInsert, key.nonEmpty).getResource
 
             case WriteModeEnum.UPSERT =>
-              documentClient.upsertDocument(config.getTarget, document, requestOptionsInsert, key.nonEmpty).getResource
+              documentClient.upsertDocument(s"dbs/${settings.database}/colls/${config.getTarget}", document, requestOptionsInsert, key.nonEmpty).getResource
           }
         }
       }
@@ -116,7 +110,7 @@ object DocumentDbWriter extends StrictLogging {
     implicit val settings = DocumentDbSinkSettings(connectorConfig)
     //if error policy is retry set retry interval
     if (settings.errorPolicy.equals(ErrorPolicyEnum.RETRY)) {
-      context.timeout(connectorConfig.getLong(DocumentDbConfig.ERROR_RETRY_INTERVAL_CONFIG))
+      context.timeout(connectorConfig.getLong(DocumentDbConfigConstants.ERROR_RETRY_INTERVAL_CONFIG))
     }
 
     logger.info(s"Initialising Document Db writer.")

@@ -1,18 +1,18 @@
-/**
-  * Copyright 2017 Datamountaineer.
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  * http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  **/
+/*
+ * Copyright 2017 Datamountaineer.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.datamountaineer.streamreactor.connect.azure.documentdb.converters
 
 import java.nio.ByteBuffer
@@ -25,7 +25,6 @@ import com.microsoft.azure.documentdb.Document
 import org.apache.kafka.connect.data._
 import org.apache.kafka.connect.errors.DataException
 import org.apache.kafka.connect.sink.SinkRecord
-import org.json.JSONObject
 import org.json4s.JValue
 import org.json4s.JsonAST._
 
@@ -154,7 +153,7 @@ object SinkRecordConverter {
             }
           }
           catch {
-            case e: ClassCastException => throw new DataException("Invalid type for " + schema.`type` + ": " + value.getClass)
+            case _: ClassCastException => throw new DataException("Invalid type for " + schema.`type` + ": " + value.getClass)
           }
       }
     }
@@ -187,6 +186,7 @@ object SinkRecordConverter {
           case JInt(i) => i.toLong
           case JLong(l) => l
           case JString(s) => s
+          case JNull | JNothing => ""
           case arr: JArray => convertArray(arr)
         }.foreach(list.add)
         list
@@ -213,7 +213,7 @@ object SinkRecordConverter {
     record match {
       case jobj: JObject =>
         jobj.obj.foldLeft(new Document) { case (d, JField(n, j)) => convert(n, j, d) }
-      case other => throw new IllegalArgumentException("Can't convert invalid json!")
+      case _ => throw new IllegalArgumentException("Can't convert invalid json!")
     }
   }
 }

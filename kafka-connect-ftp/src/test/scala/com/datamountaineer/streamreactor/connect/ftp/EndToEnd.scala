@@ -1,17 +1,17 @@
 /*
- *  Copyright 2017 Datamountaineer.
+ * Copyright 2017 Datamountaineer.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.datamountaineer.streamreactor.connect.ftp
@@ -21,6 +21,7 @@ import java.util
 
 import better.files._
 import com.datamountaineer.streamreactor.connect.ftp.KeyStyle.KeyStyle
+import com.datamountaineer.streamreactor.connect.ftp.config.{FtpSourceConfig, FtpSourceConfigConstants}
 import com.typesafe.scalalogging.slf4j.StrictLogging
 import org.apache.ftpserver.listener.ListenerFactory
 import org.apache.ftpserver.usermanager.PropertiesUserManagerFactory
@@ -150,14 +151,14 @@ class EndToEndTests extends FunSuite with Matchers with BeforeAndAfter with Stri
 
   val server = new EmbeddedFtpServer
 
-  val defaultConfig = Map(FtpSourceConfig.Address -> s"${server.host}:${server.port}",
-    FtpSourceConfig.User -> server.username,
-    FtpSourceConfig.Password -> server.password,
-    FtpSourceConfig.RefreshRate -> "PT0S",
-    FtpSourceConfig.MonitorTail -> "/tails/:tails",
-    FtpSourceConfig.MonitorUpdate -> "/updates/:updates",
-    FtpSourceConfig.FileMaxAge -> "P7D",
-    FtpSourceConfig.KeyStyle -> "string"
+  val defaultConfig = Map(FtpSourceConfigConstants.ADDRESS -> s"${server.host}:${server.port}",
+    FtpSourceConfigConstants.USER -> server.username,
+    FtpSourceConfigConstants.PASSWORD -> server.password,
+    FtpSourceConfigConstants.REFRESH_RATE -> "PT0S",
+    FtpSourceConfigConstants.MONITOR_TAIL -> "/tails/:tails",
+    FtpSourceConfigConstants.MONITOR_UPDATE -> "/updates/:updates",
+    FtpSourceConfigConstants.FILE_MAX_AGE -> "P7D",
+    FtpSourceConfigConstants.KEY_STYLE -> "string"
   )
 
   def validateSourceRecords(recs:Seq[SourceRecord], diffs:Seq[(String,String,FileDiff)], keyStyle: KeyStyle = KeyStyle.String) = {
@@ -184,7 +185,7 @@ class EndToEndTests extends FunSuite with Matchers with BeforeAndAfter with Stri
     val fs = new FileSystem(server.rootDir).clear
     server.start()
 
-    val cfg = new FtpSourceConfig(defaultConfig.updated(FtpSourceConfig.KeyStyle,"struct").asJava)
+    val cfg = new FtpSourceConfig(defaultConfig.updated(FtpSourceConfigConstants.KEY_STYLE,"struct").asJava)
 
     val offsets = new DummyOffsetStorage
     val poller = new FtpSourcePoller(cfg, offsets)
@@ -202,7 +203,7 @@ class EndToEndTests extends FunSuite with Matchers with BeforeAndAfter with Stri
     val fs = new FileSystem(server.rootDir).clear
     server.start()
 
-    val cfg = new FtpSourceConfig(defaultConfig.updated(FtpSourceConfig.KeyStyle,"string").asJava)
+    val cfg = new FtpSourceConfig(defaultConfig.updated(FtpSourceConfigConstants.KEY_STYLE,"string").asJava)
 
     val offsets = new DummyOffsetStorage
     val poller = new FtpSourcePoller(cfg, offsets)

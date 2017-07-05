@@ -1,25 +1,25 @@
-/**
-  * Copyright 2017 Datamountaineer.
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  * http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  **/
+/*
+ * Copyright 2017 Datamountaineer.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.datamountaineer.streamreactor.connect.azure.documentdb.sink
 
 import java.util
 
 import com.datamountaineer.streamreactor.connect.azure.documentdb.DocumentClientProvider
-import com.datamountaineer.streamreactor.connect.azure.documentdb.config.{DocumentDbConfig, DocumentDbSinkSettings}
+import com.datamountaineer.streamreactor.connect.azure.documentdb.config.{DocumentDbConfig, DocumentDbConfigConstants, DocumentDbSinkSettings}
 import com.microsoft.azure.documentdb._
 import com.typesafe.scalalogging.slf4j.StrictLogging
 import org.apache.kafka.common.config.{ConfigDef, ConfigException}
@@ -55,7 +55,7 @@ class DocumentDbSinkConnector private[sink](builder: DocumentDbSinkSettings => D
   override def taskConfigs(maxTasks: Int): util.List[util.Map[String, String]] = {
     logger.info(s"Setting task configurations for $maxTasks workers.")
 
-    val kcql = configProps.get(DocumentDbConfig.KCQL_CONFIG).split(";")
+    val kcql = configProps.get(DocumentDbConfigConstants.KCQL_CONFIG).split(";")
     if (maxTasks == 1 || kcql.length == 1) {
       List(configProps)
     }
@@ -65,7 +65,7 @@ class DocumentDbSinkConnector private[sink](builder: DocumentDbSinkSettings => D
         .map(_.mkString(";"))
         .map { routes =>
           val taskProps = new util.HashMap[String, String](configProps)
-          taskProps.put(DocumentDbConfig.KCQL_CONFIG, routes)
+          taskProps.put(DocumentDbConfigConstants.KCQL_CONFIG, routes)
           taskProps
         }.toList
     }
@@ -111,7 +111,7 @@ class DocumentDbSinkConnector private[sink](builder: DocumentDbSinkSettings => D
     requestOptions.setOfferThroughput(400)
     settings.kcql.map(_.getTarget).foreach { collectionName =>
       Try(documentClient.readCollection(s"dbs/${settings.database}/colls/$collectionName", requestOptions).getResource) match {
-        case Failure(e) =>
+        case Failure(_) =>
           logger.warn(s"Collection:$collectionName doesn't exist. Creating it...")
           val collection = new DocumentCollection()
           collection.setId(collectionName)

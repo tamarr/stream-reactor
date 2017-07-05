@@ -1,24 +1,23 @@
 /*
- *  Copyright 2017 Datamountaineer.
+ * Copyright 2017 Datamountaineer.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.datamountaineer.streamreactor.connect.hbase.writers
 
 import com.datamountaineer.streamreactor.connect.hbase.BytesHelper._
-import com.datamountaineer.streamreactor.connect.hbase.config.HbaseSinkConfig._
-import com.datamountaineer.streamreactor.connect.hbase.config.{HbaseSettings, HbaseSinkConfig}
+import com.datamountaineer.streamreactor.connect.hbase.config.{HbaseSettings, HbaseSinkConfig, HbaseSinkConfigConstants}
 import com.datamountaineer.streamreactor.connect.hbase.{FieldsValuesExtractor, HbaseHelper, HbaseTableHelper, StructFieldsRowKeyBuilderBytes}
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.kafka.connect.data.{Schema, SchemaBuilder, Struct}
@@ -33,19 +32,19 @@ import org.scalatest.{BeforeAndAfter, Matchers, WordSpec}
 class HbaseWriterTestRetry extends WordSpec with Matchers with MockitoSugar with BeforeAndAfter {
 
   implicit val formats = DefaultFormats
-  var miniCluster : Option[MiniCluster] = None
+  var miniCluster: Option[MiniCluster] = None
 
   before {
     val workDir = "target/kite-minicluster-workdir-hbase"
     miniCluster = Some(new MiniCluster
-                            .Builder()
-                            .workDir(workDir)
-                            .bindIP("localhost")
-                            .zkPort(2181)
-                            .addService(classOf[HdfsService])
-                            .addService(classOf[ZookeeperService])
-                            .addService(classOf[HBaseService])
-                            .clean(true).build)
+    .Builder()
+      .workDir(workDir)
+      .bindIP("localhost")
+      .zkPort(2181)
+      .addService(classOf[HdfsService])
+      .addService(classOf[ZookeeperService])
+      .addService(classOf[HBaseService])
+      .clean(true).build)
     miniCluster.get.start()
   }
 
@@ -66,10 +65,10 @@ class HbaseWriterTestRetry extends WordSpec with Matchers with MockitoSugar with
       val columnFamily = "somecolumnFamily"
       val QUERY_ALL = s"INSERT INTO $tableName SELECT * FROM $topic PK firstName"
 
-      when(config.getString(COLUMN_FAMILY)).thenReturn(columnFamily)
-      when(config.getString(EXPORT_ROUTE_QUERY)).thenReturn(QUERY_ALL)
-      when(config.getString(HbaseSinkConfig.ERROR_POLICY)).thenReturn("RETRY")
-      when(config.getInt(HbaseSinkConfig.NBR_OF_RETRIES)).thenReturn(HbaseSinkConfig.NBR_OF_RETIRES_DEFAULT)
+      when(config.getString(HbaseSinkConfigConstants.COLUMN_FAMILY)).thenReturn(columnFamily)
+      when(config.getString(HbaseSinkConfigConstants.EXPORT_ROUTE_QUERY)).thenReturn(QUERY_ALL)
+      when(config.getString(HbaseSinkConfigConstants.ERROR_POLICY)).thenReturn("RETRY")
+      when(config.getInt(HbaseSinkConfigConstants.NBR_OF_RETRIES)).thenReturn(HbaseSinkConfigConstants.NBR_OF_RETIRES_DEFAULT)
 
       val settings = HbaseSettings(config)
 

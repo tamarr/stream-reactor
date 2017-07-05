@@ -1,24 +1,24 @@
 /*
- *  Copyright 2017 Datamountaineer.
+ * Copyright 2017 Datamountaineer.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.datamountaineer.streamreactor.connect.mongodb.sink
 
 import java.util
 
-import com.datamountaineer.streamreactor.connect.mongodb.config.MongoConfig
+import com.datamountaineer.streamreactor.connect.mongodb.config.{MongoConfig, MongoSinkConfigConstants}
 import com.typesafe.scalalogging.slf4j.StrictLogging
 import org.apache.kafka.common.config.ConfigDef
 import org.apache.kafka.connect.connector.{Connector, Task}
@@ -51,7 +51,7 @@ class MongoSinkConnector extends Connector with StrictLogging {
   override def taskConfigs(maxTasks: Int): util.List[util.Map[String, String]] = {
     logger.info(s"Setting task configurations for $maxTasks workers.")
 
-    val kcql = configProps.get(MongoConfig.KCQL_CONFIG).split(";")
+    val kcql = configProps.get(MongoSinkConfigConstants.KCQL_CONFIG).split(";")
     if (maxTasks == 1 || kcql.length == 1) {
       List(configProps)
     }
@@ -61,7 +61,7 @@ class MongoSinkConnector extends Connector with StrictLogging {
         .map(_.mkString(";"))
         .map { routes =>
           val taskProps = new util.HashMap[String, String](configProps)
-          taskProps.put(MongoConfig.KCQL_CONFIG, routes)
+          taskProps.put(MongoSinkConfigConstants.KCQL_CONFIG, routes)
           taskProps
         }.toList
     }

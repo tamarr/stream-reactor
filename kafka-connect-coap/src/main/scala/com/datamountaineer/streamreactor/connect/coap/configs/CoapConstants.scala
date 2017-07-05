@@ -1,17 +1,17 @@
 /*
- *  Copyright 2017 Datamountaineer.
+ * Copyright 2017 Datamountaineer.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.datamountaineer.streamreactor.connect.coap.configs
@@ -68,7 +68,7 @@ object CoapConstants {
       | There are three available options:
       |    NOOP - the error is swallowed
       |    THROW - the error is allowed to propagate.
-      |    RETRY - The exception causes the Connect framework to retry the message. The number of retries is set by connect.cassandra.max.retires.
+      |    RETRY - The exception causes the Connect framework to retry the message. The number of retries is set by connect.cassandra.max.retries.
       |All errors will be logged automatically, even if the code swallows them.
     """.stripMargin
   val ERROR_POLICY_DEFAULT = "THROW"
@@ -76,7 +76,7 @@ object CoapConstants {
   val ERROR_RETRY_INTERVAL = "connect.coap.retry.interval"
   val ERROR_RETRY_INTERVAL_DOC = "The time in milliseconds between retries."
   val ERROR_RETRY_INTERVAL_DEFAULT = "60000"
-  val NBR_OF_RETRIES = "connect.coap.max.retires"
+  val NBR_OF_RETRIES = "connect.coap.max.retries"
   val NBR_OF_RETRIES_DOC = "The maximum number of times to try the write again."
   val NBR_OF_RETIRES_DEFAULT = 20
 
@@ -84,4 +84,13 @@ object CoapConstants {
   val COAP_DISCOVER_IP6 = "discoverIP6"
   val COAP_DISCOVER_IP4_ADDRESS = "224.0.1.187"
   val COAP_DISCOVER_IP6_ADDRESS = "FF05::FD"
+
+  val PROGRESS_COUNTER_ENABLED = "connect.progress.enabled"
+  val PROGRESS_COUNTER_ENABLED_DOC = "Enables the output for how many records have been processed"
+  val PROGRESS_COUNTER_ENABLED_DEFAULT = false
+  val PROGRESS_COUNTER_ENABLED_DISPLAY = "Enable progress counter"
+
+  val BATCH_SIZE = "connect.coap.batch.size"
+  val BATCH_SIZE_DEFAULT = 100
+  val BATCH_SIZE_DOC = "The number of events to take from the internal queue to batch together to send to Kafka."
 }

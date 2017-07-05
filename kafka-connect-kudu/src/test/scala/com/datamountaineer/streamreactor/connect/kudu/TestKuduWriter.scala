@@ -1,17 +1,17 @@
 /*
- *  Copyright 2017 Datamountaineer.
+ * Copyright 2017 Datamountaineer.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.datamountaineer.streamreactor.connect.kudu
@@ -84,7 +84,7 @@ class TestKuduWriter extends TestBase with KuduConverter with MockitoSugar {
   }
 
   "should identify schema change from source records" in {
-    val schema1 =  createSchema
+    val schema1 = createSchema
     val schema2 = createSchema5
 
     val rec1 = createSinkRecord(createRecord(schema1, "1"), TOPIC, 1)
@@ -119,36 +119,36 @@ class TestKuduWriter extends TestBase with KuduConverter with MockitoSugar {
   }
 
   "A Kudu Writer should throw retry on flush errors" in {
-      val record = getTestRecords.head
-      val kuduSchema = convertToKuduSchema(record)
-      val kuduRow = kuduSchema.newPartialRow()
+    val record = getTestRecords.head
+    val kuduSchema = convertToKuduSchema(record)
+    val kuduRow = kuduSchema.newPartialRow()
 
-      //mock out kudu client
-      val insert = mock[Upsert]
-      val table = mock[KuduTable]
-      val client = mock[KuduClient]
-      val kuduSession = mock[KuduSession]
-      val resp = mock[OperationResponse]
-      val errorRow = mock[RowError]
+    //mock out kudu client
+    val insert = mock[Upsert]
+    val table = mock[KuduTable]
+    val client = mock[KuduClient]
+    val kuduSession = mock[KuduSession]
+    val resp = mock[OperationResponse]
+    val errorRow = mock[RowError]
 
-      val config = new KuduSinkConfig(getConfigAutoCreateRetry(""))
-      val settings = KuduSettings(config)
+    val config = new KuduSinkConfig(getConfigAutoCreateRetry(""))
+    val settings = KuduSettings(config)
 
-      when(client.newSession()).thenReturn(kuduSession)
-      when(client.tableExists(TABLE)).thenReturn(true)
-      when(client.openTable(TABLE)).thenReturn(table)
-      when(table.newUpsert()).thenReturn(insert)
-      when(table.getSchema).thenReturn(kuduSchema)
-      when(insert.getRow).thenReturn(kuduRow)
-      when(resp.hasRowError).thenReturn(true)
-      when(errorRow.toString).thenReturn("Test error string")
-      when(resp.getRowError).thenReturn(errorRow)
-      when(kuduSession.flush()).thenReturn(List(resp))
+    when(client.newSession()).thenReturn(kuduSession)
+    when(client.tableExists(TABLE)).thenReturn(true)
+    when(client.openTable(TABLE)).thenReturn(table)
+    when(table.newUpsert()).thenReturn(insert)
+    when(table.getSchema).thenReturn(kuduSchema)
+    when(insert.getRow).thenReturn(kuduRow)
+    when(resp.hasRowError).thenReturn(true)
+    when(errorRow.toString).thenReturn("Test error string")
+    when(resp.getRowError).thenReturn(errorRow)
+    when(kuduSession.flush()).thenReturn(List(resp))
 
-      val writer = new KuduWriter(client, settings)
+    val writer = new KuduWriter(client, settings)
 
-      intercept[RetriableException] {
-        writer.write(getTestRecords)
-      }
+    intercept[RetriableException] {
+      writer.write(getTestRecords)
     }
+  }
 }

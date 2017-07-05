@@ -1,25 +1,24 @@
 /*
- *  Copyright 2017 Datamountaineer.
+ * Copyright 2017 Datamountaineer.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.datamountaineer.streamreactor.connect.jms.sink
 
 import java.util
 
-import com.datamountaineer.streamreactor.connect.jms.JMSSinkTask
-import com.datamountaineer.streamreactor.connect.jms.sink.config.JMSSinkConfig
+import com.datamountaineer.streamreactor.connect.jms.config.JMSConfig
 import com.typesafe.scalalogging.slf4j.StrictLogging
 import org.apache.kafka.common.config.ConfigDef
 import org.apache.kafka.connect.connector.Task
@@ -35,7 +34,7 @@ import scala.collection.JavaConverters._
   **/
 class JMSSinkConnector extends SinkConnector with StrictLogging {
   private var configProps: Option[util.Map[String, String]] = None
-  private val configDef = JMSSinkConfig.config
+  private val configDef = JMSConfig.config
 
   /**
     * States which SinkTask class to use
@@ -59,7 +58,7 @@ class JMSSinkConnector extends SinkConnector with StrictLogging {
     * @param props A map of properties for the connector and worker
     **/
   override def start(props: util.Map[String, String]): Unit = {
-    logger.info(s"Starting Jms sink task with ${props.toString}.")
+    logger.info(s"Starting Jms sink task.")
     configProps = Some(props)
   }
 

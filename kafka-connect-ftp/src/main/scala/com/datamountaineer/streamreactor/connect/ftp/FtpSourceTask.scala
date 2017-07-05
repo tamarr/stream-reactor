@@ -1,17 +1,17 @@
 /*
- *  Copyright 2017 Datamountaineer.
+ * Copyright 2017 Datamountaineer.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.datamountaineer.streamreactor.connect.ftp
@@ -20,6 +20,7 @@ import java.time.Duration
 import java.util
 
 import com.datamountaineer.streamreactor.connect.ftp.SourceRecordProducers.SourceRecordProducer
+import com.datamountaineer.streamreactor.connect.ftp.config.{FtpSourceConfig, FtpSourceConfigConstants}
 import com.typesafe.scalalogging.slf4j.StrictLogging
 import org.apache.kafka.connect.data.{Schema, SchemaBuilder, Struct}
 import org.apache.kafka.connect.errors.ConnectException
@@ -33,7 +34,7 @@ import scala.util.{Failure, Success}
 object SourceRecordProducers {
   type SourceRecordProducer = (ConnectFileMetaDataStore, String, FileMetaData, FileBody) => SourceRecord
 
-  val fileInfoSchema = SchemaBuilder.struct().name("com.datamountaineer.streamreactor.connect.ftp.FileInfo")
+  val fileInfoSchema: Schema = SchemaBuilder.struct().name("com.datamountaineer.streamreactor.connect.ftp.FileInfo")
     .field("name", Schema.STRING_SCHEMA)
     .field("offset", Schema.INT64_SCHEMA)
     .build()
@@ -70,22 +71,22 @@ object SourceRecordProducers {
 class FtpSourcePoller(cfg: FtpSourceConfig, offsetStorage: OffsetStorageReader) extends StrictLogging {
   val metaStore = new ConnectFileMetaDataStore(offsetStorage)
 
-  val monitor2topic = cfg.ftpMonitorConfigs
+  val monitor2topic: Map[MonitoredPath, String] = cfg.ftpMonitorConfigs
     .map(monitorCfg => (MonitoredPath(monitorCfg.path, monitorCfg.tail), monitorCfg.topic)).toMap
 
-  val pollDuration = Duration.parse(cfg.getString(FtpSourceConfig.RefreshRate))
-  val maxBackoff = Duration.parse(cfg.getString(FtpSourceConfig.MaxBackoff))
+  val pollDuration: Duration = Duration.parse(cfg.getString(FtpSourceConfigConstants.REFRESH_RATE))
+  val maxBackoff: Duration = Duration.parse(cfg.getString(FtpSourceConfigConstants.MAX_BACKOFF))
 
   var backoff = new ExponentialBackOff(pollDuration, maxBackoff)
 
-  val ftpMonitor = {val (host,optPort) = cfg.address
+  val ftpMonitor: FtpMonitor = {val (host,optPort) = cfg.address
     new FtpMonitor(
     FtpMonitorSettings(
       host,
       optPort,
-      cfg.getString(FtpSourceConfig.User),
-      cfg.getPassword(FtpSourceConfig.Password).value,
-      Some(Duration.parse(cfg.getString(FtpSourceConfig.FileMaxAge))),
+      cfg.getString(FtpSourceConfigConstants.USER),
+      cfg.getPassword(FtpSourceConfigConstants.PASSWORD).value,
+      Some(Duration.parse(cfg.getString(FtpSourceConfigConstants.FILE_MAX_AGE))),
       monitor2topic.keys.toSeq,
       cfg.timeoutMs()),
     metaStore)}

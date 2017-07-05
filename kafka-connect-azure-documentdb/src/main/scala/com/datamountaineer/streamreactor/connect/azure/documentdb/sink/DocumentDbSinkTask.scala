@@ -1,26 +1,27 @@
-/**
-  * Copyright 2017 Datamountaineer.
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  * http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  **/
+/*
+ * Copyright 2017 Datamountaineer.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.datamountaineer.streamreactor.connect.azure.documentdb.sink
 
 import java.util
 
 import com.datamountaineer.streamreactor.connect.azure.documentdb.DocumentClientProvider
-import com.datamountaineer.streamreactor.connect.azure.documentdb.config.{DocumentDbConfig, DocumentDbSinkSettings}
+import com.datamountaineer.streamreactor.connect.azure.documentdb.config.{DocumentDbConfig, DocumentDbConfigConstants, DocumentDbSinkSettings}
 import com.datamountaineer.streamreactor.connect.errors.ErrorPolicyEnum
+import com.datamountaineer.streamreactor.connect.utils.ProgressCounter
 import com.microsoft.azure.documentdb.DocumentClient
 import com.typesafe.scalalogging.slf4j.StrictLogging
 import org.apache.kafka.clients.consumer.OffsetAndMetadata
@@ -40,7 +41,8 @@ import scala.util.{Failure, Success, Try}
 class DocumentDbSinkTask private[sink](val builder: DocumentDbSinkSettings => DocumentClient) extends SinkTask with StrictLogging {
   private var writer: Option[DocumentDbWriter] = None
 
-  logger.info("Task initialising")
+  private val progressCounter = new ProgressCounter
+  private var enableProgress: Boolean = false
 
   def this() = this(DocumentClientProvider.get)
 
@@ -58,7 +60,7 @@ class DocumentDbSinkTask private[sink](val builder: DocumentDbSinkSettings => Do
     implicit val settings = DocumentDbSinkSettings(taskConfig)
     //if error policy is retry set retry interval
     if (settings.errorPolicy.equals(ErrorPolicyEnum.RETRY)) {
-      context.timeout(taskConfig.getLong(DocumentDbConfig.ERROR_RETRY_INTERVAL_CONFIG))
+      context.timeout(taskConfig.getLong(DocumentDbConfigConstants.ERROR_RETRY_INTERVAL_CONFIG))
     }
 
     logger.info(s"Initialising Document Db writer.")
@@ -70,7 +72,12 @@ class DocumentDbSinkTask private[sink](val builder: DocumentDbSinkSettings => Do
     **/
   override def put(records: util.Collection[SinkRecord]): Unit = {
     require(writer.nonEmpty, "Writer is not set!")
-    writer.foreach(w => w.write(records.toVector))
+    val seq = records.toVector
+    writer.foreach(w => w.write(seq))
+
+    if (enableProgress) {
+      progressCounter.update(seq)
+    }
   }
 
   override def stop(): Unit = {

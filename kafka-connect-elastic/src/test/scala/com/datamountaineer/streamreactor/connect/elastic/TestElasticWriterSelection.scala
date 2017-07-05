@@ -1,24 +1,24 @@
 /*
- *  Copyright 2017 Datamountaineer.
+ * Copyright 2017 Datamountaineer.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.datamountaineer.streamreactor.connect.elastic
 
 import java.util.UUID
 
-import com.datamountaineer.streamreactor.connect.elastic.config.{ElasticSettings, ElasticSinkConfig}
+import com.datamountaineer.streamreactor.connect.elastic.config.{ElasticSettings, ElasticSinkConfig, ElasticSinkConfigConstants}
 import com.sksamuel.elastic4s.ElasticClient
 import com.sksamuel.elastic4s.ElasticDsl._
 import org.apache.kafka.connect.sink.SinkTaskContext
@@ -42,7 +42,7 @@ class TestElasticWriterSelection extends TestElasticBase with MockitoSugar {
     val config  = new ElasticSinkConfig(getElasticSinkConfigPropsSelection)
 
     val essettings = Settings
-      .settingsBuilder().put(ElasticSinkConfig.ES_CLUSTER_NAME, ElasticSinkConfig.ES_CLUSTER_NAME_DEFAULT)
+      .settingsBuilder().put(ElasticSinkConfigConstants.ES_CLUSTER_NAME, ElasticSinkConfigConstants.ES_CLUSTER_NAME_DEFAULT)
       .put("path.home", TMP.toString).build()
     val client = ElasticClient.local(essettings)
 
@@ -73,7 +73,7 @@ class TestElasticWriterSelection extends TestElasticBase with MockitoSugar {
     val config  = new ElasticSinkConfig(getElasticSinkUpdateConfigPropsSelection)
 
     val essettings = Settings
-      .settingsBuilder().put(ElasticSinkConfig.ES_CLUSTER_NAME, ElasticSinkConfig.ES_CLUSTER_NAME_DEFAULT)
+      .settingsBuilder().put(ElasticSinkConfigConstants.ES_CLUSTER_NAME, ElasticSinkConfigConstants.ES_CLUSTER_NAME_DEFAULT)
       .put("path.home", TMP.toString).build()
     val client = ElasticClient.local(essettings)
     val settings = ElasticSettings(config)

@@ -1,17 +1,17 @@
 /*
- *  Copyright 2017 Datamountaineer.
+ * Copyright 2017 Datamountaineer.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.datamountaineer.streamreactor.connect.coap.configs
@@ -51,13 +51,17 @@ case class CoapConfig() {
       ConfigDef.Width.LONG, CoapConstants.COAP_DTLS_BIND_PORT)
     .define(CoapConstants.COAP_DTLS_BIND_HOST, Type.STRING, CoapConstants.COAP_DTLS_BIND_HOST_DEFAULT, Importance.LOW, CoapConstants.COAP_DTLS_BIND_HOST_DOC,
       "Connection", 9, ConfigDef.Width.LONG, CoapConstants.COAP_DTLS_BIND_HOST)
+    .define(CoapConstants.PROGRESS_COUNTER_ENABLED, Type.BOOLEAN, CoapConstants.PROGRESS_COUNTER_ENABLED_DEFAULT, Importance.MEDIUM,
+      CoapConstants.PROGRESS_COUNTER_ENABLED_DOC, "Metrics", 1, ConfigDef.Width.MEDIUM, CoapConstants.PROGRESS_COUNTER_ENABLED_DISPLAY)
+    .define(CoapConstants.BATCH_SIZE, Type.INT, CoapConstants.BATCH_SIZE_DEFAULT, Importance.MEDIUM,
+      CoapConstants.BATCH_SIZE_DOC, "Metrics", 1, ConfigDef.Width.MEDIUM, CoapConstants.BATCH_SIZE)
 
 }
 
 object CoapSinkConfig {
-  val base = CoapConfig().config
+  val base: ConfigDef = CoapConfig().config
 
-  val config = base
+  val config: ConfigDef = base
     .define(CoapConstants.ERROR_POLICY, Type.STRING, CoapConstants.ERROR_POLICY_DEFAULT, Importance.HIGH, CoapConstants.ERROR_POLICY_DOC,
       "Error", 1, ConfigDef.Width.LONG, CoapConstants.ERROR_POLICY)
     .define(CoapConstants.NBR_OF_RETRIES, Type.INT, CoapConstants.NBR_OF_RETIRES_DEFAULT, Importance.MEDIUM, CoapConstants.NBR_OF_RETRIES_DOC,
@@ -70,7 +74,7 @@ case class CoapSinkConfig(props: util.Map[String, String])
   extends AbstractConfig(CoapSinkConfig.config, props)
 
 object CoapSourceConfig {
-  val config = CoapConfig().config
+  val config: ConfigDef = CoapConfig().config
 }
 
 case class CoapSourceConfig(props: util.Map[String, String])

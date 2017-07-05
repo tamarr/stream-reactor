@@ -1,34 +1,34 @@
 /*
- *  Copyright 2017 Datamountaineer.
+ * Copyright 2017 Datamountaineer.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.datamountaineer.streamreactor.connect.redis.sink
 
 import java.util
-import java.util.{Timer, TimerTask}
 
 import com.datamountaineer.streamreactor.connect.errors.ErrorPolicyEnum
-import com.datamountaineer.streamreactor.connect.redis.sink.config.{RedisSinkConfig, RedisSinkSettings}
+import com.datamountaineer.streamreactor.connect.redis.sink.config.{RedisSinkConfig, RedisSinkConfigConstants, RedisSinkSettings}
 import com.datamountaineer.streamreactor.connect.redis.sink.writer.{RedisCache, RedisInsertSortedSet, RedisMultipleSortedSets, RedisWriter}
+import com.datamountaineer.streamreactor.connect.utils.ProgressCounter
 import com.typesafe.scalalogging.slf4j.StrictLogging
 import org.apache.kafka.clients.consumer.OffsetAndMetadata
 import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.connect.sink.{SinkRecord, SinkTask}
 
 import scala.collection.JavaConversions._
-import scala.collection.mutable
+import scala.collection.JavaConverters._
 
 /**
   * <h1>RedisSinkTask</h1>
@@ -38,40 +38,14 @@ import scala.collection.mutable
   **/
 class RedisSinkTask extends SinkTask with StrictLogging {
   var writer: List[RedisWriter] = List[RedisWriter]()
-
-  private val counter = mutable.Map.empty[String, Long]
-  private var timestamp: Long = 0
-
-  class LoggerTask extends TimerTask {
-    override def run(): Unit = logCounts()
-  }
-
-  def logCounts(): mutable.Map[String, Long] = {
-    counter.foreach( { case (k,v) => logger.info(s"Delivered $v records for $k.") })
-    counter.empty
-  }
+  private val progressCounter = new ProgressCounter
+  private var enableProgress: Boolean = false
 
   /**
     * Parse the configurations and setup the writer
     **/
   override def start(props: util.Map[String, String]): Unit = {
-    logger.info(
-
-      """
-        |
-        |    ____        __        __  ___                  __        _
-        |   / __ \____ _/ /_____ _/  |/  /___  __  ______  / /_____ _(_)___  ___  ___  _____
-        |  / / / / __ `/ __/ __ `/ /|_/ / __ \/ / / / __ \/ __/ __ `/ / __ \/ _ \/ _ \/ ___/
-        | / /_/ / /_/ / /_/ /_/ / /  / / /_/ / /_/ / / / / /_/ /_/ / / / / /  __/  __/ /
-        |/_____/\__,_/\__/\__,_/_/  /_/\____/\__,_/_/ /_/\__/\__,_/_/_/ /_/\___/\___/_/
-        |       ____           ___      _____ _       __
-        |      / __ \___  ____/ (_)____/ ___/(_)___  / /__
-        |     / /_/ / _ \/ __  / / ___/\__ \/ / __ \/ //_/
-        |    / _, _/  __/ /_/ / (__  )___/ / / / / / ,<
-        |   /_/ |_|\___/\__,_/_/____//____/_/_/ /_/_/|_|
-        |
-        |  By Stefan Bocutiu & Antonios Chalkiopoulos
-      """.stripMargin)
+    logger.info(scala.io.Source.fromInputStream(getClass.getResourceAsStream("/redis-ascii.txt")).mkString)
 
     RedisSinkConfig.config.parse(props)
     val sinkConfig = new RedisSinkConfig(props)
@@ -79,7 +53,7 @@ class RedisSinkTask extends SinkTask with StrictLogging {
 
     //if error policy is retry set retry interval
     if (settings.errorPolicy.equals(ErrorPolicyEnum.RETRY)) {
-      context.timeout(sinkConfig.getInt(RedisSinkConfig.ERROR_RETRY_INTERVAL).toLong)
+      context.timeout(sinkConfig.getInt(RedisSinkConfigConstants.ERROR_RETRY_INTERVAL).toLong)
     }
 
     //-- Find out the Connector modes (cache | INSERT (SortedSet) | PK (SortedSetS)
@@ -103,9 +77,6 @@ class RedisSinkTask extends SinkTask with StrictLogging {
         logger.info("Starting " + mode_PK_SS.kcqlSettings.size + " KCQLs with Redis Multiple Sorted Sets mode")
         List(new RedisMultipleSortedSets(modeCache))
       }).flatten.toList
-
-
-
   }
 
   /**
@@ -117,13 +88,12 @@ class RedisSinkTask extends SinkTask with StrictLogging {
     }
     else {
       require(writer.nonEmpty, "Writer is not set!")
-      writer.foreach(w => w.write(records.toSeq))
-      records.foreach(r => counter.put(r.topic() , counter.getOrElse(r.topic(), 0L) + 1L))
-      val newTimestamp = System.currentTimeMillis()
-      if (counter.nonEmpty && scala.concurrent.duration.SECONDS.toSeconds(newTimestamp - timestamp) >= 60) {
-        logCounts()
+      val seq = records.toVector
+      writer.foreach(w => w.write(seq))
+
+      if (enableProgress) {
+        progressCounter.update(seq)
       }
-      timestamp = newTimestamp
     }
   }
 
@@ -133,6 +103,7 @@ class RedisSinkTask extends SinkTask with StrictLogging {
   override def stop(): Unit = {
     logger.info("Stopping Redis sink.")
     writer.foreach(w => w.close())
+    progressCounter.empty
   }
 
   override def flush(map: util.Map[TopicPartition, OffsetAndMetadata]): Unit = {
