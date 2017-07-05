@@ -64,8 +64,6 @@ class TestElasticWriter extends TestElasticBase with MockitoSugar {
   }
 
   "A ElasticWriter should update a number of records in Elastic Search" in {
-    val TMP = File(System.getProperty("java.io.tmpdir") + "/elastic-" + UUID.randomUUID())
-    TMP.createDirectory()
     //mock the context to return our assignment when called
     val context = mock[SinkTaskContext]
     when(context.assignment()).thenReturn(getAssignment)
